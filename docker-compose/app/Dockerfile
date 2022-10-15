@@ -22,15 +22,18 @@ RUN mkdir -p /usr/src/php/ext/redis; \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath opcache gd
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
+# Add user for laravel application
+RUN groupadd -g 1000 $user
+RUN useradd -u 1000 -ms /bin/bash -g $user $user
+
+COPY . /var/www
+COPY --chown=$user:$user . /var/www
+#RUN chown -R 755 storage/
 
 # Set working directory
 WORKDIR /var/www

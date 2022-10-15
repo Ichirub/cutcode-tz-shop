@@ -1,78 +1,78 @@
 version: "3.8"
 services:
-    app:
-        build:
-            args:
-                user: rhs
-                uid: 1000
-            context: ./
-            dockerfile: ./docker-compose/app/Dockerfile
-        image: cutcodetzshop
-        container_name: cutcodetzshop-app
-        restart: unless-stopped
-        working_dir: /var/www/
-        volumes:
-            - ./:/var/www
-        depends_on:
-            - db
-            - redis
-        networks:
-            - cutcode-tz-shop
+  app:
+    build:
+      args:
+        user: rhs
+        uid: 1000
+      context: ./
+      dockerfile: ./docker-compose/app/Dockerfile
+    image: cutcodetzshop
+    container_name: cutcodetzshop-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - db
+      - redis
+    networks:
+      - cutcode-tz-shop
 
-    db:
-        image: mysql:8.0
-        container_name: cutcodetzshop-db
-        restart: unless-stopped
-        environment:
-            MYSQL_DATABASE: ${DB_DATABASE}
-            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
-            MYSQL_ROOT_USER: ${DB_USERNAME}
-            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-            SERVICE_TAGS: dev
-            SERVICE_NAME: mysql
-        volumes:
-            - ./docker-compose/mysql:/docker-entrypoint-initdb.d
-        networks:
-            - cutcode-tz-shop
+  db:
+    image: mysql:8.0
+    container_name: cutcodetzshop-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_USER: ${DB_USERNAME}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./docker-compose/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - cutcode-tz-shop
 
-    npm:
-        image: node:16-alpine3.16
-        container_name: cutcodetzshop-npm
-        working_dir: /var/www/
-        entrypoint: ["npm"]
-        volumes:
-            - "./:/var/www/"
-        networks:
-            - cutcode-tz-shop
+  npm:
+    image: node:16-alpine3.16
+    container_name: cutcodetzshop-npm
+    working_dir: /var/www/
+    entrypoint: [ "npm" ]
+    volumes:
+      - "./:/var/www/"
+    networks:
+      - cutcode-tz-shop
 
-    redis:
-        image: redis:6.2-alpine
-        restart: always
-        container_name: cutcodetzshop-redis
-        ports:
-            - ${REDIS_PORT}:${REDIS_PORT}
-        volumes:
-            - cache:/data
-        networks:
-            - cutcode-tz-shop
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    container_name: cutcodetzshop-redis
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    volumes:
+      - cache:/data
+    networks:
+      - cutcode-tz-shop
 
-    nginx:
-        image: nginx:alpine
-        container_name: cutcodetzshop-nginx
-        restart: unless-stopped
-        ports:
-            - 8000:80
-        volumes:
-            - ./:/var/www
-            - ./docker-compose/nginx:/etc/nginx/conf.d/
-        networks:
-            - cutcode-tz-shop
+  nginx:
+    image: nginx:alpine
+    container_name: cutcodetzshop-nginx
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      - cutcode-tz-shop
 
 networks:
-    cutcode-tz-shop:
-        driver: bridge
+  cutcode-tz-shop:
+    driver: bridge
 
 volumes:
-    cache:
-        driver: local
+  cache:
+    driver: local
