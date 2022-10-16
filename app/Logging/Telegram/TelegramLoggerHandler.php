@@ -36,7 +36,8 @@ class TelegramLoggerHandler extends AbstractProcessingHandler
 
     protected function formattedMessage(RecordDTO $record): string
     {
-        return '[' . $record->dateTime()->format('d.m.Y H:i:s') . '] ' .
-            $record->channel() . '.' . $record->levelName() . ': ' . $record->message();
+        return '[' . $record->dateTime()->format('d.m.Y H:i:s') . "]\n"
+            . $record->channel() . '.' . $record->levelName() . ":\n"
+            . $record->message();
     }
 }

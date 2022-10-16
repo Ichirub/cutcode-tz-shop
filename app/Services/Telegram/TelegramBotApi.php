@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
+use App\Services\Telegram\Exceptions\TelegramSendMessageException;
 use Illuminate\Support\Facades\Http;
 
 class TelegramBotApi
@@ -12,13 +13,19 @@ class TelegramBotApi
 
     public static function sendMessage(string $token, int $chatId, string $text)
     {
-        Http::get(
-            self::sendMessageUrl($token),
-            ['chat_id' => $chatId, 'text' => $text]
-        );
+        try {
+            $response = Http::acceptJson()->get(
+                self::sendMessageUrl($token),
+                ['chat_id' => $chatId, 'text' => $text]
+            );
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            TelegramSendMessageException::throwException($e);
+        }
     }
 
-    protected static function sendMessageUrl(string $token)
+    protected static function sendMessageUrl(string $token): string
     {
         return self::buildBaseUrl($token) . '/sendMessage';
     }
