@@ -1,10 +1,16 @@
-# Installation
+# Installation:
+
+### Default
 
 - ```php artisan storage:link```
 - ```composer install```
 - ```php artisan migrate```
 
-# DOCKER Installation
+### Installation by Command
+
+- ```php artisan shop:install```
+
+### By Docker
 
 - ```docker-compose build app```
 - ```docker-compose up -d```
@@ -13,7 +19,9 @@
 - ```docker-compose exec app php artisan cache:clear```
 - ```docker-compose exec app php artisan config:clear```
 
-# DOCKER Npm
+# Npm:
+
+### By Docker
 
 - ```docker-compose run --rm npm install {PACKAGE_NAME}```
 - ```docker-compose run --rm npm run dev```

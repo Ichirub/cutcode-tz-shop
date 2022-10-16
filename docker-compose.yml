@@ -32,7 +32,8 @@ services:
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     volumes:
-      - ./docker-compose/mysql:/docker-entrypoint-initdb.d
+      - cutcode-tz-shop-db-data:/var/lib/mysql
+      - ./docker-compose/db:/docker-entrypoint-initdb.d
     networks:
       - cutcode-tz-shop
 
@@ -53,7 +54,7 @@ services:
     ports:
       - ${REDIS_PORT}:${REDIS_PORT}
     volumes:
-      - cache:/data
+      - cutcode-tz-shop-redis-data:/data
     networks:
       - cutcode-tz-shop
 
@@ -74,5 +75,7 @@ networks:
     driver: bridge
 
 volumes:
-  cache:
+  cutcode-tz-shop-redis-data:
+    driver: local
+  cutcode-tz-shop-db-data:
     driver: local
