@@ -12,41 +12,47 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         if ($this->app->isLocal()) {
             $this->app->register(IdeHelperServiceProvider::class);
         }
     }
 
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
-        Model::preventLazyLoading(!app()->isProduction());
-        Model::preventSilentlyDiscardingAttributes(!app()->isProduction());
+        if (!$this->app->isProduction()) {
+            Model::shouldBeStrict(true);
+            return;
+        }
 
-        DB::whenQueryingForLongerThan(500, function (Connection $connection) {
+        // @TODO Refactoring later
+        $telegramLogger = function (string $msg, array $context = []) {
             logger()
                 ->channel('telegram')
-                ->debug('whenQueryingForLongerThan: ' . $connection->query()->toSql());
+                ->debug($msg, $context);
+        };
+
+        // PRODUCTION
+        DB::whenQueryingForLongerThan(
+            CarbonInterval::seconds(5),
+            function (Connection $connection) use ($telegramLogger) {
+                $telegramLogger('whenQueryingForLongerThan: ' . $connection->query()->toSql());
+            }
+        );
+
+        DB::listen(static function ($query) use ($telegramLogger) {
+            // $query->sql | bindings | time
+            if ($query->time > 500) {
+                $telegramLogger('DB::listen' . $query->sql, $query->bindings);
+            }
         });
 
         $kernel = app(Kernel::class);
         $kernel->whenRequestLifecycleIsLongerThan(
             CarbonInterval::seconds(4),
-            function () {
-                logger()
-                    ->channel('telegram')
-                    ->debug('whenRequestLifecycleIsLongerThan: ' . request()->url());
+            function () use ($telegramLogger) {
+                $telegramLogger('whenRequestLifecycleIsLongerThan: ' . request()->url());
             }
         );
     }

@@ -31,6 +31,8 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
+    ports:
+      - ${DB_PORT}:${DB_PORT}
     volumes:
       - cutcode-tz-shop-db-data:/var/lib/mysql
       - ./docker-compose/db:/docker-entrypoint-initdb.d
