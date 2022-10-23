@@ -3,8 +3,11 @@
 namespace App\Providers;
 
 use App\Http\Kernel;
+use App\Services\Faker\Image\FakerImageProvider;
 use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 use Carbon\CarbonInterval;
+use Faker\Factory;
+use Faker\Generator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -16,6 +19,13 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->isLocal()) {
             $this->app->register(IdeHelperServiceProvider::class);
         }
+
+        $this->app->singleton(Generator::class, function () {
+            $faker = Factory::create(config('app.faker_locale'));
+            $faker->addProvider(new FakerImageProvider($faker));
+
+            return $faker;
+        });
     }
 
     public function boot(): void
@@ -32,7 +42,9 @@ class AppServiceProvider extends ServiceProvider
                 ->debug($msg, $context);
         };
 
-        // PRODUCTION
+        /**
+         * PRODUCTION
+         */
         DB::listen(static function ($query) use ($telegramLogger) {
             // $query->sql | ->bindings | ->time
             if ($query->time > 500) {
