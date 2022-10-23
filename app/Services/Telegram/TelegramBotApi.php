@@ -6,32 +6,32 @@ namespace App\Services\Telegram;
 
 use App\Services\Telegram\Exceptions\TelegramSendMessageException;
 use Illuminate\Support\Facades\Http;
+use Throwable;
 
 class TelegramBotApi
 {
     public const HOST = 'https://api.telegram.org/bot';
 
-    public static function sendMessage(string $token, int $chatId, string $text)
+    public static function sendMessage(string $token, int $chatId, string $text): bool
     {
         try {
-            $response = Http::acceptJson()->get(
-                self::sendMessageUrl($token),
-                ['chat_id' => $chatId, 'text' => $text]
-            );
+            $response = Http::acceptJson()
+                ->throw()
+                ->get(
+                    self::getSendMessageUrl($token),
+                    ['chat_id' => $chatId, 'text' => $text]
+                );
 
             return $response->successful();
-        } catch (\Exception $e) {
-            TelegramSendMessageException::throwException($e);
+        } catch (Throwable $e) {
+            report(TelegramSendMessageException::newException($e));
+
+            return false;
         }
     }
 
-    protected static function sendMessageUrl(string $token): string
+    protected static function getSendMessageUrl(string $token): string
     {
-        return self::buildBaseUrl($token) . '/sendMessage';
-    }
-
-    protected static function buildBaseUrl(string $token): string
-    {
-        return self::HOST . $token;
+        return self::HOST . $token . '/sendMessage';
     }
 }
