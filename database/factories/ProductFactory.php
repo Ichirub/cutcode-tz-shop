@@ -18,7 +18,10 @@ class ProductFactory extends Factory
             'price' => $this->faker->numberBetween(1000, 100000),
             'brand_id' => Brand::query()->inRandomOrder()->value('id'),
             // @TODO
-            'thumbnail' => '',
+            'thumbnail' => $this->faker->file(
+                base_path('/tests/Fixtures/images/products'),
+                storage_path('app/public/images/products')
+            ),
         ];
     }
 }
